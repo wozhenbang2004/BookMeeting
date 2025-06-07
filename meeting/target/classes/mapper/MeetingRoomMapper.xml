@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oi.meeting.mapper.MeetingRoomMapper">
+
+    <resultMap id="BaseResultMap" type="com.oi.meeting.entity.MeetingRoom">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="capacity" property="capacity"/>
+        <result column="has_projector" property="hasProjector"/>
+        <result column="has_sound" property="hasSound"/>
+        <result column="has_network" property="hasNetwork"/>
+        <result column="price_per_hour" property="pricePerHour"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, type, capacity, has_projector, has_sound, has_network, price_per_hour, status, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.oi.meeting.entity.MeetingRoom" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO meeting_rooms (name, type, capacity, has_projector, has_sound, has_network, price_per_hour, status, create_time, update_time)
+        VALUES (#{name}, #{type}, #{capacity}, #{hasProjector}, #{hasSound}, #{hasNetwork}, #{pricePerHour}, #{status}, NOW(), NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.oi.meeting.entity.MeetingRoom">
+        UPDATE meeting_rooms SET
+        name = #{name},
+        type = #{type},
+        capacity = #{capacity},
+        has_projector = #{hasProjector},
+        has_sound = #{hasSound},
+        has_network = #{hasNetwork},
+        price_per_hour = #{pricePerHour},
+        status = #{status},
+        update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM meeting_rooms WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM meeting_rooms WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM meeting_rooms ORDER BY name
+    </select>
+
+    <select id="selectByStatus" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM meeting_rooms WHERE status = #{status}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE meeting_rooms SET status = #{status}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="selectAvailableRooms" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM meeting_rooms mr
+        WHERE mr.status = 'AVAILABLE'
+        <if test="capacity != null and capacity > 0">
+            AND mr.capacity >= #{capacity}
+        </if>
+        <if test="needProjector != null and needProjector">
+            AND mr.has_projector = true
+        </if>
+        <if test="needSound != null and needSound">
+            AND mr.has_sound = true
+        </if>
+        <if test="needNetwork != null and needNetwork">
+            AND mr.has_network = true
+        </if>
+        AND mr.id NOT IN (
+            SELECT DISTINCT b.room_id FROM bookings b
+            WHERE b.status IN ('PAID', 'LOCKED')
+            AND ((b.start_time &lt;= #{startTime} AND b.end_time &gt; #{startTime})
+                OR (b.start_time &lt; #{endTime} AND b.end_time &gt;= #{endTime})
+                OR (b.start_time &gt;= #{startTime} AND b.end_time &lt;= #{endTime}))
+        )
+        ORDER BY mr.price_per_hour
+    </select>
+
+</mapper>

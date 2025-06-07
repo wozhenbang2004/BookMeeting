@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oi.meeting.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.oi.meeting.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="role" property="role"/>
+        <result column="company" property="company"/>
+        <result column="phone" property="phone"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, username, password, name, role, company, phone, status, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.oi.meeting.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (username, password, name, role, company, phone, status, create_time, update_time)
+        VALUES (#{username}, #{password}, #{name}, #{role}, #{company}, #{phone}, #{status}, NOW(), NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.oi.meeting.entity.User">
+        UPDATE users SET
+        username = #{username},
+        password = #{password},
+        name = #{name},
+        role = #{role},
+        company = #{company},
+        phone = #{phone},
+        status = #{status},
+        update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM users WHERE id = #{id}
+    </select>
+
+    <select id="selectByUsername" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM users WHERE username = #{username}
+    </select>
+
+    <select id="selectByRole" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM users WHERE role = #{role}
+    </select>
+
+    <select id="selectByStatus" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM users WHERE status = #{status}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM users ORDER BY create_time DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE users SET status = #{status}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+</mapper>

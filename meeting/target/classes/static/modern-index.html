@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会议室预订系统 - 现代版</title>
+    <!-- 引入现代字体和图标 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+         :root {
+            --primary-color: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary-color: #764ba2;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --error-color: #f56565;
+            --info-color: #4299e1;
+            --background-color: #f7fafc;
+            --surface-color: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .app-container {
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+        
+        .current-user {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 30px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        .user-details h3 {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        
+        .user-role {
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+        
+        .card-header h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card-header .icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        
+        .card-body {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--surface-color);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            gap: 8px;
+            min-width: 120px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--text-primary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+        
+        .btn-full {
+            width: 100%;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: var(--border-radius-sm);
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .result.success {
+            background: rgba(72, 187, 120, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(72, 187, 120, 0.2);
+        }
+        
+        .result.error {
+            background: rgba(245, 101, 101, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(245, 101, 101, 0.2);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .current-user {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* 数据展示样式 */
+        
+        .data-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .data-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .data-item {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            border-radius: var(--border-radius-sm);
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .data-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .data-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .data-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+        
+        .data-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: rgba(72, 187, 120, 0.2);
+            color: var(--success-color);
+        }
+        
+        .status-pending {
+            background: rgba(237, 137, 54, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .status-locked {
+            background: rgba(245, 101, 101, 0.2);
+            color: var(--error-color);
+        }
+        
+        .status-paid {
+            background: rgba(72, 187, 120, 0.2);
+            color: var(--success-color);
+        }
+        
+        .status-available {
+            background: rgba(66, 153, 225, 0.2);
+            color: var(--info-color);
+        }
+        
+        .status-in-use {
+            background: rgba(237, 137, 54, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .data-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        
+        .data-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .data-field .icon {
+            color: var(--primary-color);
+            width: 16px;
+        }
+        
+        .data-field .label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .data-field .value {
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--surface-color);
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        
+        .data-table tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: var(--border-radius-sm);
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .summary-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+        
+        .summary-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: var(--border-radius-sm);
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9rem;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- 页面头部 -->
+        <div class="header">
+            <h1><i class="fas fa-calendar-alt"></i> 会议室预订系统</h1>
+            <p>智能化会议室管理，让预订更简单</p>
+        </div>
+
+        <!-- 当前用户信息 -->
+        <div class="current-user" id="currentUser">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-details">
+                    <h3 id="userName">用户名</h3>
+                    <span class="user-role" id="userRole">角色</span>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> 退出登录
+            </button>
+        </div>
+
+        <div class="main-content">
+            <!-- 登录注册区域 -->
+            <div class="grid" id="authSection">
+                <!-- 用户登录 -->
+                <div class="card fade-in" id="loginCard">
+                    <div class="card-header">
+                        <h3><i class="fas fa-sign-in-alt icon"></i>用户登录</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">用户名</label>
+                            <input type="text" class="form-input" id="loginUsername" placeholder="请输入用户名">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">密码</label>
+                            <input type="password" class="form-input" id="loginPassword" placeholder="请输入密码">
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="login()">
+                            <i class="fas fa-sign-in-alt"></i> 登录
+                        </button>
+                        <div class="result" id="loginResult"></div>
+                    </div>
+                </div>
+
+                <!-- 用户注册 -->
+                <div class="card fade-in" id="registerCard">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user-plus icon"></i>用户注册</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">用户名</label>
+                            <input type="text" class="form-input" id="regUsername" placeholder="请输入用户名">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">密码</label>
+                            <input type="password" class="form-input" id="regPassword" placeholder="请输入密码">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">姓名</label>
+                            <input type="text" class="form-input" id="regName" placeholder="请输入真实姓名">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">角色</label>
+                            <select class="form-input" id="regRole" onchange="toggleCustomerFields()">
+                                <option value="CUSTOMER">客户</option>
+                                <option value="EMPLOYEE">员工</option>
+                                <option value="ADMIN">管理员</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="companyField">
+                            <label class="form-label">公司名称</label>
+                            <input type="text" class="form-input" id="regCompany" placeholder="请输入公司名称">
+                        </div>
+                        <div class="form-group" id="phoneField">
+                            <label class="form-label">联系电话</label>
+                            <input type="text" class="form-input" id="regPhone" placeholder="请输入联系电话">
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="register()">
+                            <i class="fas fa-user-plus"></i> 注册
+                        </button>
+                        <div class="result" id="registerResult"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 会议室搜索 -->
+            <div class="grid" id="searchSection">
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-search icon"></i>搜索可用会议室</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">开始时间</label>
+                            <input type="datetime-local" class="form-input" id="searchStartTime">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">结束时间</label>
+                            <input type="datetime-local" class="form-input" id="searchEndTime">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">最少座位数</label>
+                            <input type="number" class="form-input" id="searchCapacity" min="1" placeholder="请输入最少座位数">
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox" id="needProjector">
+                            <label>需要投影仪</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox" id="needSound">
+                            <label>需要音响</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox" id="needNetwork">
+                            <label>需要网络</label>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="searchRooms()">
+                            <i class="fas fa-search"></i> 搜索会议室
+                        </button>
+                        <div class="result" id="searchResult"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 客户功能区域 -->
+            <div class="grid" id="customerSection" style="display: none;">
+                <!-- 预订会议室 -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-plus icon"></i>预订会议室</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">选择会议室</label>
+                            <select class="form-input" id="bookingRoomId">
+                                <option value="">请先搜索可用会议室</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">开始时间</label>
+                            <input type="datetime-local" class="form-input" id="bookingStartTime">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">结束时间</label>
+                            <input type="datetime-local" class="form-input" id="bookingEndTime">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">参会人数</label>
+                            <input type="number" class="form-input" id="participantCount" min="1" placeholder="请输入参会人数">
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox" id="bookingNeedProjector">
+                            <label>需要投影仪</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox" id="bookingNeedSound">
+                            <label>需要音响</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox" id="bookingNeedNetwork">
+                            <label>需要网络</label>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="createBooking()">
+                            <i class="fas fa-calendar-plus"></i> 创建预订
+                        </button>
+                        <div class="result" id="bookingResult"></div>
+                    </div>
+                </div>
+
+                <!-- 我的预订 -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list icon"></i>我的预订</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="getMyBookings()">
+                                <i class="fas fa-refresh"></i> 刷新列表
+                            </button>
+                        </div>
+                        <div class="result" id="myBookingsResult"></div>
+
+                        <!-- 支付功能 -->
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="form-label">支付预订</label>
+                            <select class="form-input" id="paymentBookingId">
+                                <option value="">请先查看我的预订</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-success btn-full" onclick="payBooking()">
+                            <i class="fas fa-credit-card"></i> 支付预订
+                        </button>
+                        <div class="result" id="paymentResult"></div>
+                    </div>
+                </div>
+
+                <!-- 取消申请 -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-times-circle icon"></i>取消申请</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">选择要取消的预订</label>
+                            <select class="form-input" id="cancellationBookingId">
+                                <option value="">请先查看我的预订</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">取消原因</label>
+                            <textarea class="form-input" id="cancellationReason" placeholder="请输入取消原因" rows="3"></textarea>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-warning" onclick="submitCancellation()">
+                                <i class="fas fa-paper-plane"></i> 提交申请
+                            </button>
+                            <button class="btn btn-secondary" onclick="getCancellationRules()">
+                                <i class="fas fa-info-circle"></i> 退费规则
+                            </button>
+                        </div>
+                        <div class="result" id="cancellationResult"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 管理员功能区域 -->
+            <div class="grid" id="adminSection" style="display: none;">
+                <!-- 用户管理 -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-users icon"></i>用户管理</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="getAllUsers()">
+                                <i class="fas fa-list"></i> 所有用户
+                            </button>
+                            <button class="btn btn-warning" onclick="getPendingUsers()">
+                                <i class="fas fa-clock"></i> 待审核用户
+                            </button>
+                        </div>
+                        <div class="result" id="userManagementResult"></div>
+                    </div>
+                </div>
+
+                <!-- 会议室管理 -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-building icon"></i>会议室管理</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="getAllRooms()">
+                                <i class="fas fa-list"></i> 所有会议室
+                            </button>
+                            <button class="btn btn-primary" onclick="showAddRoomForm()">
+                                <i class="fas fa-plus"></i> 添加会议室
+                            </button>
+                        </div>
+                        <div class="result" id="roomManagementResult"></div>
+                    </div>
+                </div>
+
+                <!-- 系统统计 -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-bar icon"></i>系统统计</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="btn btn-info" onclick="getSystemStatistics()">
+                                <i class="fas fa-chart-pie"></i> 系统统计
+                            </button>
+                            <button class="btn btn-success" onclick="getTodayStatistics()">
+                                <i class="fas fa-calendar-day"></i> 今日统计
+                            </button>
+                        </div>
+                        <div class="result" id="statisticsResult"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 员工功能区域 -->
+            <div class="grid" id="employeeSection" style="display: none;">
+                <!-- 预订管理 -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-check icon"></i>预订管理</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="getAllBookings()">
+                                <i class="fas fa-list"></i> 所有预订
+                            </button>
+                            <button class="btn btn-warning" onclick="getPendingCancellations()">
+                                <i class="fas fa-exclamation-triangle"></i> 待审核取消
+                            </button>
+                        </div>
+                        <div class="result" id="bookingManagementResult"></div>
+                    </div>
+                </div>
+
+                <!-- 会议室状态 -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-cogs icon"></i>会议室状态</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="getAllRooms()">
+                                <i class="fas fa-eye"></i> 查看状态
+                            </button>
+                        </div>
+                        <div class="result" id="roomStatusResult"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加会议室表单 -->
+            <div class="grid" id="addRoomSection" style="display: none;">
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h3><i class="fas fa-plus-circle icon"></i>添加会议室</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">会议室名称</label>
+                            <input type="text" class="form-input" id="roomName" placeholder="请输入会议室名称">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">会议室类型</label>
+                            <select class="form-input" id="roomType">
+                                <option value="CLASSROOM">教室型</option>
+                                <option value="ROUNDTABLE">圆桌型</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">座位数</label>
+                            <input type="number" class="form-input" id="roomCapacity" min="1" placeholder="请输入座位数">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">每小时价格</label>
+                            <input type="number" class="form-input" id="roomPrice" min="0" step="0.01" placeholder="请输入每小时价格">
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox" id="roomHasProjector">
+                            <label>有投影仪</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox" id="roomHasSound">
+                            <label>有音响</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox" id="roomHasNetwork">
+                            <label>有网络</label>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="addRoom()">
+                                <i class="fas fa-save"></i> 添加会议室
+                            </button>
+                            <button class="btn btn-secondary" onclick="hideAddRoomForm()">
+                                <i class="fas fa-times"></i> 取消
+                            </button>
+                        </div>
+                        <div class="result" id="addRoomResult"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // 工具函数
+        function showResult(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'result ' + (isSuccess ? 'success' : 'error');
+            element.style.display = 'block';
+
+            // 添加动画效果
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                element.style.transition = 'all 0.3s ease';
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        function toggleCustomerFields() {
+            const role = document.getElementById('regRole').value;
+            const companyField = document.getElementById('companyField');
+            const phoneField = document.getElementById('phoneField');
+
+            if (role === 'CUSTOMER') {
+                companyField.style.display = 'block';
+                phoneField.style.display = 'block';
+            } else {
+                companyField.style.display = 'none';
+                phoneField.style.display = 'none';
+            }
+        }
+
+        function updateUserInterface() {
+            if (currentUser) {
+                // 显示用户信息
+                document.getElementById('currentUser').style.display = 'flex';
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userRole').textContent = currentUser.role;
+                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+
+                // 隐藏登录注册区域
+                document.getElementById('authSection').style.display = 'none';
+
+                // 根据角色显示不同功能
+                if (currentUser.role === 'ADMIN') {
+                    document.getElementById('adminSection').style.display = 'grid';
+                    document.getElementById('employeeSection').style.display = 'none';
+                    document.getElementById('customerSection').style.display = 'none';
+                } else if (currentUser.role === 'EMPLOYEE') {
+                    document.getElementById('adminSection').style.display = 'none';
+                    document.getElementById('employeeSection').style.display = 'grid';
+                    document.getElementById('customerSection').style.display = 'none';
+                } else if (currentUser.role === 'CUSTOMER') {
+                    document.getElementById('adminSection').style.display = 'none';
+                    document.getElementById('employeeSection').style.display = 'none';
+                    document.getElementById('customerSection').style.display = 'grid';
+                }
+            } else {
+                // 隐藏用户信息
+                document.getElementById('currentUser').style.display = 'none';
+
+                // 显示登录注册区域
+                document.getElementById('authSection').style.display = 'grid';
+
+                // 隐藏所有功能区域
+                document.getElementById('adminSection').style.display = 'none';
+                document.getElementById('employeeSection').style.display = 'none';
+                document.getElementById('customerSection').style.display = 'none';
+                document.getElementById('addRoomSection').style.display = 'none';
+            }
+        }
+
+        // 用户认证功能
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                showResult('loginResult', '请输入用户名和密码', false);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                });
+
+                const result = await response.json();
+                if (result.code === 200) {
+                    currentUser = result.data;
+                    showResult('loginResult', '登录成功！');
+                    updateUserInterface();
+
+                    // 清空表单
+                    document.getElementById('loginUsername').value = '';
+                    document.getElementById('loginPassword').value = '';
+                } else {
+                    showResult('loginResult', result.message, false);
+                }
+            } catch (error) {
+                showResult('loginResult', '登录失败：' + error.message, false);
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            updateUserInterface();
+            // 清空所有结果显示
+            document.querySelectorAll('.result').forEach(el => el.style.display = 'none');
+        }
+
+        async function register() {
+            const userData = {
+                username: document.getElementById('regUsername').value,
+                password: document.getElementById('regPassword').value,
+                name: document.getElementById('regName').value,
+                role: document.getElementById('regRole').value,
+                company: document.getElementById('regCompany').value,
+                phone: document.getElementById('regPhone').value
+            };
+
+            if (!userData.username || !userData.password || !userData.name) {
+                showResult('registerResult', '请填写必要信息', false);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/user/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const result = await response.json();
+                if (result.code === 200) {
+                    showResult('registerResult', result.message);
+                    // 清空表单
+                    document.getElementById('regUsername').value = '';
+                    document.getElementById('regPassword').value = '';
+                    document.getElementById('regName').value = '';
+                    document.getElementById('regCompany').value = '';
+                    document.getElementById('regPhone').value = '';
+                } else {
+                    showResult('registerResult', result.message, false);
+                }
+            } catch (error) {
+                showResult('registerResult', '注册失败：' + error.message, false);
+            }
+        }
+    </script>
+
+    <!-- 引入其他功能模块 -->
+    <script src="modern-app.js"></script>
+    <script src="admin-functions.js"></script>
+</body>
+
+</html>

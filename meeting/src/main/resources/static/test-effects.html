@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动漫特效测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: #2c3e50;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            cursor: none;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 为可点击元素恢复指针 */
+        button, a, input, select, textarea, [onclick], .clickable {
+            cursor: pointer !important;
+        }
+        
+        /* 自定义鼠标样式 */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ff6b9d 0%, #c44569 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.6);
+        }
+        
+        .custom-cursor::before {
+            content: '✨';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            font-size: 12px;
+            animation: cursorSparkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes cursorSparkle {
+            0%, 100% { opacity: 0.5; transform: rotate(0deg); }
+            50% { opacity: 1; transform: rotate(180deg); }
+        }
+        
+        .custom-cursor.clicking {
+            transform: scale(1.5);
+            background: radial-gradient(circle, #ff9ff3 0%, #f368e0 100%);
+            box-shadow: 0 0 30px rgba(255, 107, 157, 0.8);
+        }
+        
+        /* 鼠标轨迹 */
+        .cursor-trail {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #ff6b9d 0%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            animation: trailFade 0.8s ease-out forwards;
+        }
+        
+        @keyframes trailFade {
+            0% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.3); }
+        }
+        
+        /* 点击特效 */
+        .click-effect {
+            position: fixed;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 9997;
+        }
+        
+        .click-ripple {
+            position: absolute;
+            border: 2px solid #ff6b9d;
+            border-radius: 50%;
+            animation: clickRipple 0.6s ease-out forwards;
+        }
+        
+        @keyframes clickRipple {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+                margin: 0;
+            }
+            100% {
+                width: 60px;
+                height: 60px;
+                opacity: 0;
+                margin: -30px;
+            }
+        }
+        
+        .click-stars {
+            position: absolute;
+            font-size: 16px;
+            animation: clickStars 1s ease-out forwards;
+        }
+        
+        @keyframes clickStars {
+            0% { opacity: 1; transform: scale(0) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+            100% { opacity: 0; transform: scale(0.8) rotate(360deg); }
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .test-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            margin: 20px;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 157, 0.3);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 自定义鼠标 -->
+    <div class="custom-cursor" id="customCursor"></div>
+    
+    <div class="container">
+        <div class="test-card">
+            <h1>🎨 动漫特效测试</h1>
+            <p>移动鼠标查看轨迹效果，点击任意位置查看爆炸特效！</p>
+            
+            <button class="test-button" onclick="testAlert()">
+                ✨ 测试按钮 1
+            </button>
+            
+            <button class="test-button" onclick="testAlert()">
+                🌟 测试按钮 2
+            </button>
+            
+            <button class="test-button" onclick="testAlert()">
+                💫 测试按钮 3
+            </button>
+            
+            <div style="margin-top: 30px;">
+                <p style="font-size: 0.9rem; color: #888;">
+                    如果你能看到粉色的自定义鼠标、移动轨迹和点击爆炸效果，说明特效系统正常工作！
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🎮 开始测试动漫特效...');
+        
+        // 初始化自定义鼠标
+        function initCustomCursor() {
+            const cursor = document.getElementById('customCursor');
+            if (!cursor) {
+                console.error('❌ 找不到自定义鼠标元素！');
+                return;
+            }
+            
+            console.log('✅ 找到自定义鼠标元素，开始初始化...');
+            let mouseX = 0, mouseY = 0;
+            let cursorX = 0, cursorY = 0;
+
+            // 鼠标移动事件
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                // 创建鼠标轨迹
+                createCursorTrail(mouseX, mouseY);
+            });
+            
+            console.log('✅ 鼠标移动事件已绑定');
+
+            // 平滑跟随动画
+            function animateCursor() {
+                cursorX += (mouseX - cursorX) * 0.1;
+                cursorY += (mouseY - cursorY) * 0.1;
+
+                cursor.style.left = cursorX - 10 + 'px';
+                cursor.style.top = cursorY - 10 + 'px';
+
+                requestAnimationFrame(animateCursor);
+            }
+            animateCursor();
+
+            // 鼠标按下效果
+            document.addEventListener('mousedown', () => {
+                cursor.classList.add('clicking');
+            });
+
+            document.addEventListener('mouseup', () => {
+                cursor.classList.remove('clicking');
+            });
+        }
+
+        // 创建鼠标轨迹
+        function createCursorTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            trail.style.left = x - 3 + 'px';
+            trail.style.top = y - 3 + 'px';
+
+            document.body.appendChild(trail);
+
+            // 0.8秒后移除轨迹元素
+            setTimeout(() => {
+                if (trail.parentNode) {
+                    trail.parentNode.removeChild(trail);
+                }
+            }, 800);
+        }
+
+        // 初始化点击特效
+        function initClickEffects() {
+            document.addEventListener('click', (e) => {
+                console.log('🎯 点击位置:', e.clientX, e.clientY);
+                createClickEffect(e.clientX, e.clientY);
+            });
+            console.log('✅ 点击特效事件已绑定');
+        }
+
+        // 创建点击特效
+        function createClickEffect(x, y) {
+            const effectContainer = document.createElement('div');
+            effectContainer.className = 'click-effect';
+            effectContainer.style.left = x + 'px';
+            effectContainer.style.top = y + 'px';
+
+            // 创建波纹效果
+            const ripple = document.createElement('div');
+            ripple.className = 'click-ripple';
+            effectContainer.appendChild(ripple);
+
+            // 创建星星效果
+            const stars = ['✨', '🌟', '💫', '⭐'];
+            for (let i = 0; i < 4; i++) {
+                const star = document.createElement('div');
+                star.className = 'click-stars';
+                star.textContent = stars[i];
+                star.style.left = (Math.random() - 0.5) * 40 + 'px';
+                star.style.top = (Math.random() - 0.5) * 40 + 'px';
+                star.style.animationDelay = i * 0.1 + 's';
+                effectContainer.appendChild(star);
+            }
+
+            document.body.appendChild(effectContainer);
+
+            // 1秒后移除特效
+            setTimeout(() => {
+                if (effectContainer.parentNode) {
+                    effectContainer.parentNode.removeChild(effectContainer);
+                }
+            }, 1000);
+        }
+        
+        // 测试函数
+        function testAlert() {
+            alert('🎉 按钮点击成功！特效正常工作！');
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 页面加载完成，开始初始化特效...');
+            
+            try {
+                initCustomCursor();
+                initClickEffects();
+                console.log('✅ 所有特效初始化完成！');
+            } catch (error) {
+                console.error('❌ 特效初始化失败:', error);
+            }
+        });
+    </script>
+</body>
+</html>

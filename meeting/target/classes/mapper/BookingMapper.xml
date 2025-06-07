@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oi.meeting.mapper.BookingMapper">
+
+    <resultMap id="BaseResultMap" type="com.oi.meeting.entity.Booking">
+        <id column="id" property="id"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="room_id" property="roomId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="participant_count" property="participantCount"/>
+        <result column="need_projector" property="needProjector"/>
+        <result column="need_sound" property="needSound"/>
+        <result column="need_network" property="needNetwork"/>
+        <result column="total_price" property="totalPrice"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="payment_deadline" property="paymentDeadline"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, customer_id, room_id, start_time, end_time, participant_count, need_projector, need_sound, need_network, total_price, status, create_time, update_time, payment_deadline
+    </sql>
+
+    <insert id="insert" parameterType="com.oi.meeting.entity.Booking" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bookings (customer_id, room_id, start_time, end_time, participant_count, need_projector, need_sound, need_network, total_price, status, create_time, update_time, payment_deadline)
+        VALUES (#{customerId}, #{roomId}, #{startTime}, #{endTime}, #{participantCount}, #{needProjector}, #{needSound}, #{needNetwork}, #{totalPrice}, #{status}, NOW(), NOW(), #{paymentDeadline})
+    </insert>
+
+    <update id="updateById" parameterType="com.oi.meeting.entity.Booking">
+        UPDATE bookings SET
+        customer_id = #{customerId},
+        room_id = #{roomId},
+        start_time = #{startTime},
+        end_time = #{endTime},
+        participant_count = #{participantCount},
+        need_projector = #{needProjector},
+        need_sound = #{needSound},
+        need_network = #{needNetwork},
+        total_price = #{totalPrice},
+        status = #{status},
+        update_time = NOW(),
+        payment_deadline = #{paymentDeadline}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM bookings WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings WHERE id = #{id}
+    </select>
+
+    <select id="selectByCustomerId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings WHERE customer_id = #{customerId} ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByRoomId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings WHERE room_id = #{roomId} ORDER BY start_time
+    </select>
+
+    <select id="selectByStatus" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings WHERE status = #{status} ORDER BY create_time DESC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings ORDER BY create_time DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE bookings SET status = #{status}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="selectExpiredBookings" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings 
+        WHERE status = 'LOCKED' AND payment_deadline &lt; #{deadline}
+    </select>
+
+    <select id="selectConflictBookings" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings
+        WHERE room_id = #{roomId}
+        AND status IN ('PAID', 'LOCKED')
+        AND ((start_time &lt;= #{startTime} AND end_time &gt; #{startTime})
+            OR (start_time &lt; #{endTime} AND end_time &gt;= #{endTime})
+            OR (start_time &gt;= #{startTime} AND end_time &lt;= #{endTime}))
+    </select>
+
+    <select id="selectCancellableBookings" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings
+        WHERE customer_id = #{customerId}
+        AND status = 'PAID'
+        AND start_time &gt; #{minCancelTime}
+        ORDER BY start_time
+    </select>
+
+    <!-- 查找应该开始使用的预订 -->
+    <select id="selectBookingsToStart" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings
+        WHERE status = 'PAID'
+        AND start_time &lt;= #{currentTime}
+        AND end_time &gt; #{currentTime}
+    </select>
+
+    <!-- 查找应该结束使用的预订 -->
+    <select id="selectBookingsToEnd" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings
+        WHERE status = 'PAID'
+        AND end_time &lt;= #{currentTime}
+    </select>
+
+    <!-- 删除指定时间之前的已完成预订 -->
+    <delete id="deleteCompletedBookingsBefore">
+        DELETE FROM bookings
+        WHERE status = 'COMPLETED'
+        AND update_time &lt; #{beforeTime}
+    </delete>
+
+    <!-- 查询指定时间段内的预订 -->
+    <select id="selectBookingsBetween" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings
+        WHERE create_time BETWEEN #{startTime} AND #{endTime}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 查询指定时间段内的已支付预订 -->
+    <select id="selectPaidBookingsBetween" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM bookings
+        WHERE create_time BETWEEN #{startTime} AND #{endTime}
+        AND status IN ('PAID', 'COMPLETED')
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

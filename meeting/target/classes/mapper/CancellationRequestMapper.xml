@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oi.meeting.mapper.CancellationRequestMapper">
+
+    <resultMap id="BaseResultMap" type="com.oi.meeting.entity.CancellationRequest">
+        <id column="id" property="id"/>
+        <result column="booking_id" property="bookingId"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="reason" property="reason"/>
+        <result column="refund_amount" property="refundAmount"/>
+        <result column="refund_rate" property="refundRate"/>
+        <result column="status" property="status"/>
+        <result column="reviewer_id" property="reviewerId"/>
+        <result column="review_comment" property="reviewComment"/>
+        <result column="create_time" property="createTime"/>
+        <result column="review_time" property="reviewTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, booking_id, customer_id, reason, refund_amount, refund_rate, status, reviewer_id, review_comment, create_time, review_time
+    </sql>
+
+    <insert id="insert" parameterType="com.oi.meeting.entity.CancellationRequest" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cancellation_requests (booking_id, customer_id, reason, refund_amount, refund_rate, status, create_time)
+        VALUES (#{bookingId}, #{customerId}, #{reason}, #{refundAmount}, #{refundRate}, #{status}, NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.oi.meeting.entity.CancellationRequest">
+        UPDATE cancellation_requests SET
+        booking_id = #{bookingId},
+        customer_id = #{customerId},
+        reason = #{reason},
+        refund_amount = #{refundAmount},
+        refund_rate = #{refundRate},
+        status = #{status},
+        reviewer_id = #{reviewerId},
+        review_comment = #{reviewComment},
+        review_time = #{reviewTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM cancellation_requests WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM cancellation_requests WHERE id = #{id}
+    </select>
+
+    <select id="selectByCustomerId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM cancellation_requests WHERE customer_id = #{customerId} ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByStatus" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM cancellation_requests WHERE status = #{status} ORDER BY create_time DESC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM cancellation_requests ORDER BY create_time DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE cancellation_requests SET 
+        status = #{status}, 
+        reviewer_id = #{reviewerId}, 
+        review_comment = #{reviewComment}, 
+        review_time = NOW() 
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectByBookingId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM cancellation_requests WHERE booking_id = #{bookingId}
+    </select>
+
+</mapper>
